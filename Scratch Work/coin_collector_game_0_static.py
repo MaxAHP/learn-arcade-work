@@ -9,14 +9,11 @@ This shows you the following features:
 - moving the player sprite using the mouse
 - dealing with collisions between sprites using hit lists, and removing the coins (collectible item)
   after collision
-"""
-
-import random
-import arcade
+"""import randomimport arcade
 
 # --- Constants ---
 SPRITE_SCALING_PLAYER = 0.5
-SPRITE_SCALING_COIN = 0.3
+SPRITE_SCALING_COIN =0.3
 COIN_COUNT = 50
 
 SCREEN_WIDTH = 800
@@ -37,11 +34,8 @@ class MyGame(arcade.Window):
 
         # Set up the player info
         self.player_sprite = None
-        self.score = 0
-
-        # Don't show the mouse cursor
+        self.score = 0        # Don't show the mouse cursor
         self.set_mouse_visible(False)
-
         arcade.set_background_color(arcade.color.AMAZON)
 
     def setup(self):

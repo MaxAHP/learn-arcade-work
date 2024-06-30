@@ -45,7 +45,7 @@ class MyGame(arcade.Window):
         # Don't show the mouse cursor
         self.set_mouse_visible(False)
 
-        arcade.set_background_color(arcade.color.AMAZON)
+        arcade.set_background_color(arcade.color.GREEN)
 
     def setup(self):
         """ Set up the game and initialize the variables. """
@@ -59,7 +59,7 @@ class MyGame(arcade.Window):
 
         # Set up the player
         # Character image from builtins
-        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/male_person/malePerson_idle.png", SPRITE_SCALING_PLAYER)
+        self.player_sprite = arcade.Sprite(":resources:images/space_shooter/playerShip1_green.png", SPRITE_SCALING_PLAYER)
         self.player_sprite.center_x = 50
         self.player_sprite.center_y = 50
         self.player_list.append(self.player_sprite)
@@ -69,7 +69,7 @@ class MyGame(arcade.Window):
 
             # Create the coin instance
             # Coin image from kenney.nl
-            coin = Coin(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
+            coin = Coin(":resources:images/animated_characters/zombie/zombie_walk2.png", SPRITE_SCALING_COIN)
 
             # Position the coin
             coin.center_x = random.randrange(SCREEN_WIDTH)
@@ -83,6 +83,7 @@ class MyGame(arcade.Window):
         arcade.start_render()
         self.coin_list.draw()
         self.player_list.draw()
+
 
         # Put the text on the screen.
         output = f"Score: {self.score}"
@@ -109,7 +110,7 @@ class MyGame(arcade.Window):
         # Loop through each colliding sprite, remove it, and add to the score.
         for coin in hit_list:
             coin.remove_from_sprite_lists()
-            self.score += 1
+            self.score += 100
 
 
 def main():

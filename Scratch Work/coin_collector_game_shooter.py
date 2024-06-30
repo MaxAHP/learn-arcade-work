@@ -17,13 +17,31 @@ import arcade
 SPRITE_SCALING_PLAYER = 0.5
 SPRITE_SCALING_COIN = 0.3
 SPRITE_SCALING_LASER = 0.8
-COIN_COUNT = 220
+COIN_COUNT = 100
 
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 900
+SCREEN_HEIGHT = 700
 
 BULLET_SPEED = 5
 
+
+class Coin(arcade.Sprite):
+
+    def update(self):
+        self.center_y -= 1
+
+
+class MyGame(arcade.Window):
+    """ Our custom Window Class"""
+
+    def __init__(self):
+        """ Initializer """
+        # Call the parent class initializer
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Sprite Example")
+
+        # Variables that will hold sprite lists
+        self.player_list = None
+        self.coin_list = None
 
 class MyGame(arcade.Window):
     """ Main application class. """
@@ -45,7 +63,7 @@ class MyGame(arcade.Window):
         # Don't show the mouse cursor
         self.set_mouse_visible(False)
 
-        arcade.set_background_color(arcade.color.AMAZON)
+        arcade.set_background_color(arcade.color.DARK_GREEN)
         self.laser_sound = arcade.load_sound("laser.wav")
         self.boom_sound = arcade.load_sound(":resources:sounds/explosion1.wav")
 
@@ -63,7 +81,7 @@ class MyGame(arcade.Window):
 
         # Set up the player
         # Image from builtin resources
-        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/male_person/malePerson_idle.png", SPRITE_SCALING_PLAYER)
+        self.player_sprite = arcade.Sprite(":resources:images/space_shooter/playerShip1_green.png", SPRITE_SCALING_PLAYER)
         self.player_sprite.center_x = 50
         self.player_sprite.center_y = 70
         self.player_list.append(self.player_sprite)
@@ -73,7 +91,7 @@ class MyGame(arcade.Window):
 
             # Create the coin instance
             # Coin image from builtin resources
-            coin = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
+            coin = arcade.Sprite(":resources:images/animated_characters/zombie/zombie_walk2.png", SPRITE_SCALING_COIN)
 
             # Position the coin
             coin.center_x = random.randrange(SCREEN_WIDTH)
@@ -148,7 +166,7 @@ class MyGame(arcade.Window):
             # For every coin we hit, add to the score and remove the coin
             for coin in hit_list:
                 coin.remove_from_sprite_lists()
-                self.score += 1
+                self.score += 100
                 arcade.play_sound(self.boom_sound)
 
             # If the bullet flies off-screen, remove it.
