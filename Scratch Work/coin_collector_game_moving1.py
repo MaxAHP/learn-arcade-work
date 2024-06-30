@@ -14,7 +14,7 @@ import arcade
 # --- Constants ---
 SPRITE_SCALING_PLAYER = 0.5
 SPRITE_SCALING_COIN = 0.3
-COIN_COUNT = 50
+COIN_COUNT = 10000
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -23,7 +23,7 @@ SCREEN_HEIGHT = 600
 class Coin(arcade.Sprite):
 
     def update(self):
-        self.center_y -= 1
+        self.center_y -= 0.1
 
 
 class MyGame(arcade.Window):

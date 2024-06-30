@@ -23,25 +23,28 @@ SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 700
 
 BULLET_SPEED = 5
-
-
 class Coin(arcade.Sprite):
+    """
+    This class represents the coins on our screen. It is a child class of
+    the arcade library's "Sprite" class.
+    """
+
+    def reset_pos(self):
+
+        # Reset the coin to a random spot above the screen
+        self.center_y = random.randrange(SCREEN_HEIGHT + 20,
+                                         SCREEN_HEIGHT + 100)
+        self.center_x = random.randrange(SCREEN_WIDTH)
 
     def update(self):
-        self.center_y -= 1
 
+        # Move the coin
+        self.center_y -= 0.5
 
-class MyGame(arcade.Window):
-    """ Our custom Window Class"""
-
-    def __init__(self):
-        """ Initializer """
-        # Call the parent class initializer
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Sprite Example")
-
-        # Variables that will hold sprite lists
-        self.player_list = None
-        self.coin_list = None
+        # See if the coin has fallen off the bottom of the screen.
+        # If so, reset it.
+        if self.top < 0:
+            self.reset_pos()
 
 class MyGame(arcade.Window):
     """ Main application class. """
@@ -49,7 +52,7 @@ class MyGame(arcade.Window):
     def __init__(self):
         """ Initializer """
         # Call the parent class initializer
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Sprites and Bullets Demo")
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Zombie Apocalypse")
 
         # Variables that will hold sprite lists
         self.player_list = None
@@ -59,11 +62,11 @@ class MyGame(arcade.Window):
         # Set up the player info
         self.player_sprite = None
         self.score = 0
-
+        self.lives = 5
         # Don't show the mouse cursor
         self.set_mouse_visible(False)
 
-        arcade.set_background_color(arcade.color.DARK_GREEN)
+        arcade.set_background_color(arcade.color.GREEN)
         self.laser_sound = arcade.load_sound("laser.wav")
         self.boom_sound = arcade.load_sound(":resources:sounds/explosion1.wav")
 
@@ -78,7 +81,7 @@ class MyGame(arcade.Window):
 
         # Set up the score
         self.score = 0
-
+        self.lives = 5
         # Set up the player
         # Image from builtin resources
         self.player_sprite = arcade.Sprite(":resources:images/space_shooter/playerShip1_green.png", SPRITE_SCALING_PLAYER)
@@ -91,7 +94,7 @@ class MyGame(arcade.Window):
 
             # Create the coin instance
             # Coin image from builtin resources
-            coin = arcade.Sprite(":resources:images/animated_characters/zombie/zombie_walk2.png", SPRITE_SCALING_COIN)
+            coin = Coin(":resources:images/animated_characters/zombie/zombie_walk2.png", SPRITE_SCALING_COIN)
 
             # Position the coin
             coin.center_x = random.randrange(SCREEN_WIDTH)
@@ -118,6 +121,7 @@ class MyGame(arcade.Window):
 
         # Render the text
         arcade.draw_text(f"Score: {self.score}", 10, 20, arcade.color.WHITE, 14)
+        arcade.draw_text(f"Lives: {self.lives}", 10, 50, arcade.color.WHITE, 14)
 
     def on_mouse_motion(self, x, y, dx, dy):
         """
@@ -173,7 +177,20 @@ class MyGame(arcade.Window):
             if bullet.bottom > SCREEN_HEIGHT:
                 bullet.remove_from_sprite_lists()
 
+        # Loop through each zombie
+        for coin in self.coin_list:
 
+            # Check this zombie to see if it hit a player
+            hit_list = arcade.check_for_collision_with_list(coin, self.player_list)
+
+            # If it did, get rid of the zombie
+            if len(hit_list) > 0:
+                coin.remove_from_sprite_lists()
+
+            # If a zombie hits the player, lose a life
+            for player in hit_list:
+                self.lives -= 1
+                arcade.play_sound(self.boom_sound)
 def main():
     window = MyGame()
     window.setup()
