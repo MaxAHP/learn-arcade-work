@@ -28,6 +28,7 @@ SCREEN_TITLE = "Move with a Sprite Animation Example"
 
 COIN_SCALE = 0.5
 COIN_COUNT = 50
+COIN_COUNT = 10000
 CHARACTER_SCALING = 1
 
 
