@@ -10,19 +10,24 @@ The main changes to the code are as follows:
    bullet has moved off the top of the screen the bullet is removed.
 """
 
-
 import random
 import arcade
 
 SPRITE_SCALING_PLAYER = 0.5
 SPRITE_SCALING_COIN = 0.3
 SPRITE_SCALING_LASER = 0.8
-COIN_COUNT = 100
+COIN_COUNT = 50
 
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 700
 
-BULLET_SPEED = 5
+BULLET_SPEED = 10
+
+# These numbers represent "states" that the game can be in.
+INSTRUCTIONS_PAGE_0 = 0
+INSTRUCTIONS_PAGE_1 = 1
+GAME_RUNNING = 2
+GAME_OVER = 3
 class Coin(arcade.Sprite):
     """
     This class represents the coins on our screen. It is a child class of
@@ -69,6 +74,50 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.GREEN)
         self.laser_sound = arcade.load_sound("laser.wav")
         self.boom_sound = arcade.load_sound(":resources:sounds/explosion1.wav")
+
+        # Start 'state' will be showing the first page of instructions.
+        self.current_state = INSTRUCTIONS_PAGE_0
+
+        def draw_instructions_page(self, page_number):
+            """
+            Draw an instruction page.
+            """
+            arcade.start_render()
+
+            arcade.draw_text("Zombie Apocalypse", 100, 500, arcade.color.GREEN, 36)
+            arcade.draw_text("Move your mouse to move the spaceship. Click your mouse to fire a laser", 100, 400, arcade.color.ORANGE, 14)
+            arcade.draw_text("Press any key to restart", 100, 300, arcade.color.WHITE, 36)
+
+    def draw_game_over(self):
+        """
+        Draw "Game over" across the screen.
+        """
+        output = "Game Over"
+        arcade.draw_text(output, 240, 400, arcade.color.WHITE, 54)
+
+        output = "Click to restart"
+        arcade.draw_text(output, 310, 300, arcade.color.WHITE, 24)
+
+        def on_draw(self):
+            """
+            Render the screen.
+            """
+
+            # This command has to happen before we start drawing
+            arcade.start_render()
+
+            if self.current_state == INSTRUCTIONS_PAGE_0:
+                self.draw_instructions_page(0)
+
+            elif self.current_state == INSTRUCTIONS_PAGE_1:
+                self.draw_instructions_page(1)
+
+            elif self.current_state == GAME_RUNNING:
+                self.draw_game()
+
+            else:
+                self.draw_game()
+                self.draw_game_over()
 
     def setup(self):
 
@@ -123,6 +172,24 @@ class MyGame(arcade.Window):
         arcade.draw_text(f"Score: {self.score}", 10, 20, arcade.color.WHITE, 14)
         arcade.draw_text(f"Lives: {self.lives}", 10, 50, arcade.color.WHITE, 14)
 
+    def on_key_press(self,key, modifiers):
+        """
+        Called when the user presses a mouse button.
+        """
+
+        # Change states as needed.
+        if self.current_state == INSTRUCTIONS_PAGE_0:
+            # Next page of instructions.
+            self.current_state = INSTRUCTIONS_PAGE_1
+        elif self.current_state == INSTRUCTIONS_PAGE_1:
+            # Start the game
+            self.setup()
+            self.current_state = GAME_RUNNING
+        elif self.current_state == GAME_OVER:
+            # Restart the game.
+            self.setup()
+            self.current_state = GAME_RUNNING
+
     def on_mouse_motion(self, x, y, dx, dy):
         """
         Called whenever the mouse moves.
@@ -152,45 +219,47 @@ class MyGame(arcade.Window):
 
     def update(self, delta_time):
         """ Movement and game logic """
+        if self.current_state == GAME_OVER:
+            # Call update on all sprites
+            self.coin_list.update()
+            self.bullet_list.update()
 
-        # Call update on all sprites
-        self.coin_list.update()
-        self.bullet_list.update()
+            # Loop through each bullet
+            for bullet in self.bullet_list:
 
-        # Loop through each bullet
-        for bullet in self.bullet_list:
+                # Check this bullet to see if it hit a coin
+                hit_list = arcade.check_for_collision_with_list(bullet, self.coin_list)
 
-            # Check this bullet to see if it hit a coin
-            hit_list = arcade.check_for_collision_with_list(bullet, self.coin_list)
+                # If it did, get rid of the bullet
+                if len(hit_list) > 0:
+                    bullet.remove_from_sprite_lists()
 
-            # If it did, get rid of the bullet
-            if len(hit_list) > 0:
-                bullet.remove_from_sprite_lists()
+                # For every coin we hit, add to the score and remove the coin
+                for coin in hit_list:
+                    coin.remove_from_sprite_lists()
+                    self.score += 100
+                    arcade.play_sound(self.boom_sound)
 
-            # For every coin we hit, add to the score and remove the coin
-            for coin in hit_list:
-                coin.remove_from_sprite_lists()
-                self.score += 100
-                arcade.play_sound(self.boom_sound)
+                # If the bullet flies off-screen, remove it.
+                if bullet.bottom > SCREEN_HEIGHT:
+                    bullet.remove_from_sprite_lists()
 
-            # If the bullet flies off-screen, remove it.
-            if bullet.bottom > SCREEN_HEIGHT:
-                bullet.remove_from_sprite_lists()
+            # Loop through each zombie
+            for coin in self.coin_list:
 
-        # Loop through each zombie
-        for coin in self.coin_list:
+                # Check this zombie to see if it hit a player
+                hit_list = arcade.check_for_collision_with_list(coin, self.player_list)
 
-            # Check this zombie to see if it hit a player
-            hit_list = arcade.check_for_collision_with_list(coin, self.player_list)
+                # If it did, get rid of the zombie
+                if len(hit_list) > 0:
+                    coin.remove_from_sprite_lists()
 
-            # If it did, get rid of the zombie
-            if len(hit_list) > 0:
-                coin.remove_from_sprite_lists()
-
-            # If a zombie hits the player, lose a life
-            for player in hit_list:
-                self.lives -= 1
-                arcade.play_sound(self.boom_sound)
+                # If a zombie hits the player, lose a life
+                for player in hit_list:
+                    self.lives -= 1
+                    arcade.play_sound(self.boom_sound)
+                if self.lives <= 0:
+                            self.current_state = GAME_OVER
 def main():
     window = MyGame()
     window.setup()
